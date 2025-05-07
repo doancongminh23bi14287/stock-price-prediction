@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 def run_logistic_regression(file_path='data/AAPL.csv'):
     df = pd.read_csv(file_path)
-    df['Target'] = (df['Close'].shift(-1) > df['Close']).astype(int)  # 1 if price goes up
-    df['Prev_Close'] = df['Close'].shift(1)
+    df['Target'] = (df['AAPL.Close'].shift(-1) > df['AAPL.Close']).astype(int)  # 1 if price goes up
+    df['Prev_Close'] = df['AAPL.Close'].shift(1)
     df.dropna(inplace=True)
 
     X = df[['Prev_Close']]

@@ -7,11 +7,12 @@ from utils import plot_predictions
 
 def run_ann(file_path='data/AAPL.csv'):
     df = pd.read_csv(file_path)
-    df['Prev_Close'] = df['Close'].shift(1)
+    df['Prev_Close'] = df['AAPL.Close'].shift(1)
     df.dropna(inplace=True)
 
     X = df[['Prev_Close']]
-    y = df['Close']
+    y = df['AAPL.Close']
+
 
     scaler_X = MinMaxScaler()
     scaler_y = MinMaxScaler()
