@@ -1,9 +1,8 @@
 import pandas as pd
+from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
 from utils import plot_predictions
 
 def run_ann(file_path='data/AAPL.csv'):
@@ -14,27 +13,24 @@ def run_ann(file_path='data/AAPL.csv'):
     X = df[['Prev_Close']]
     y = df['Close']
 
-    scaler = MinMaxScaler()
-    X_scaled = scaler.fit_transform(X)
-    y_scaled = scaler.fit_transform(y.values.reshape(-1, 1))
+    scaler_X = MinMaxScaler()
+    scaler_y = MinMaxScaler()
+
+    X_scaled = scaler_X.fit_transform(X)
+    y_scaled = scaler_y.fit_transform(y.values.reshape(-1, 1)).ravel()
 
     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y_scaled, shuffle=False)
 
-    model = Sequential([
-        Dense(64, activation='relu', input_dim=1),
-        Dense(64, activation='relu'),
-        Dense(1)
-    ])
+    model = MLPRegressor(hidden_layer_sizes=(64, 64), activation='relu', max_iter=500)
+    model.fit(X_train, y_train)
+    predictions_scaled = model.predict(X_test)
 
-    model.compile(optimizer='adam', loss='mse')
-    model.fit(X_train, y_train, epochs=50, batch_size=16)
+    # Inverse transform predictions to original scale
+    predictions = scaler_y.inverse_transform(predictions_scaled.reshape(-1, 1))
+    y_test_actual = scaler_y.inverse_transform(y_test.reshape(-1, 1))
 
-    predictions = model.predict(X_test)
-    predictions = scaler.inverse_transform(predictions)
-    y_actual = scaler.inverse_transform(y_test)
-
-    plot_predictions(y_actual, predictions, "ANN Prediction")
-    print("MSE:", mean_squared_error(y_actual, predictions))
+    plot_predictions(y_test_actual, predictions, "ANN (Sklearn MLPRegressor)")
+    print("MSE:", mean_squared_error(y_test_actual, predictions))
 
 if __name__ == "__main__":
     run_ann()
